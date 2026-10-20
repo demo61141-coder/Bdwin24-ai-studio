@@ -1,0 +1,6 @@
+{
+  "name": "DKWIN",
+  "description": "DKWIN অফিশিয়াল গেমিং, কালার প্রেডিকশন, ক্র্যাশ, স্লট, থাম্বিল ও ১xবেট মাল্টি স্পোর্টস প্ল্যাটফর্ম এবং মাস্টার এডমিন কন্ট্রোল প্যানেল।",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

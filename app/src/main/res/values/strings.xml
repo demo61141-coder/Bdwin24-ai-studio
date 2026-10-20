@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">DKWIN</string>
+    <string name="brand_subtitle">বাংলাদেশের #১ গেমিং ও মাল্টি স্পোর্টস প্ল্যাটফর্ম</string>
+    <string name="nav_home">হোম</string>
+    <string name="nav_activity">অ্যাক্টিভিটি</string>
+    <string name="nav_wallet">ওয়ালেট</string>
+    <string name="nav_promo">রেফার</string>
+    <string name="nav_mine">প্রোফাইল</string>
+    <string name="nav_admin">এডমিন</string>
+    <string name="btn_deposit">ডিপোজিট</string>
+    <string name="btn_withdraw">উইথড্র</string>
+    <string name="btn_login">লগইন / রেজিস্টার</string>
+</resources>
