@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="bn" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>DKWIN - অফিশিয়াল কালার প্রেডিকশন, ক্র্যাশ, থাম্বিল, JILI স্লট ও 1xBet মাল্টি স্পোর্টস</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #070b14;
+      color: #f8fafc;
+      font-family: 'Hind Siliguri', system-ui, -apple-system, sans-serif;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 999px; }
+  </style>
+</head>
+<body class="bg-[#070b14] text-slate-100 min-h-screen">
+  <div id="app" class="max-w-lg mx-auto min-h-screen flex flex-col justify-between pb-20"></div>
+
+  <script>
+    // =========================================================================
+    // DKWIN Complete Persistent State (Synced in localStorage for Web/Vercel)
+    // =========================================================================
+    const STORAGE_KEY = "dkwin_full_platform_v2";
+
+    const defaultState = {
+      currentUserId: null,
+      isAdminLoggedIn: false,
+      activeTab: window.location.pathname === "/admin" ? "admin" : "home", // home, activity, wallet, promo, mine, admin
+      activeGame: null, // null, wingo, crash, thimbles, slots, sports, mines
+      selectedCategory: "all",
+      selectedWingoTimer: "1m",
+      selectedCrashVariant: "aviator",
+      selectedSlotId: "jili_super_ace",
+      multiBetSlip: [],
+      settings: {
+        bkashNumber: "01788223344",
+        bkashRule: "সেন্ড মানি (Send Money)",
+        nagadNumber: "01899112233",
+        nagadRule: "ক্যাশ আউট (Cash Out)",
+        rocketNumber: "01955443322",
+        rocketRule: "সেন্ড মানি (Send Money)",
+        upayNumber: "01622334455",
+        upayRule: "ক্যাশ আউট (Cash Out)",
+        depositRulesText: "১. উপরে প্রদর্শিত নাম্বার কপি করুন।\n২. নির্ধারিত নিয়ম অনুযায়ী (Send Money অথবা Cash Out) টাকা পাঠান।\n৩. টাকা পাঠানোর পর সঠিক TrxID ও আপনার প্রেরক নাম্বার দিয়ে সাবমিট করুন।",
+        pendingProcessingNotice: "আপনার ব্যালেন্স পেতে ২ মিনিট থেকে সর্বোচ্চ ১০ মিনিট সময় লাগতে পারে। এডমিন যাচাই করে অনুমোদন করা মাত্রই ব্যালেন্স যুক্ত হবে।",
+        minDeposit: 50,
+        minWithdraw: 100,
+        minBet: 1,
+        depositBonusPercent: 5,
+        referralDepositCommissionPercent: 3,
+        referralBetCommissionPercent: 1,
+        referralFixedBonus: 25,
+        wingoFeePercent: 2,
+        telegramSupportUsername: "@DKWIN_Official_Support",
+        adminPin: "admin1234",
+        siteNotice: "DKWIN অফিশিয়াল গেমিং প্ল্যাটফর্মে স্বাগতম! সর্বনিম্ন ডিপোজিট ৫০ টাকা এবং সর্বনিম্ন বেট মাত্র ১ টাকা। বিকাশ ও নগদে দ্রুত পেমেন্ট!",
+        forcedWingoMode: "AUTO_BALANCED", // AUTO_BALANCED, FORCE_BIG, FORCE_SMALL, FORCE_GREEN, FORCE_RED, FORCE_VIOLET, FORCE_NUMBER
+        forcedWingoNumber: -1,
+        forcedCrashMode: "AUTO", // AUTO, FORCE_CRASH
+        forcedCrashMultiplier: 1.80,
+        thimblesWinRatePercent: 45,
+        slotsWinRatePercent: 45
+      },
+      users: [],
+      transactions: [],
+      gameBets: [],
+      wingoHistory: [
+        { periodNumber: "202610200101", timerType: "1m", winningNumber: 7, winningColor: "green", winningSize: "big" },
+        { periodNumber: "202610200100", timerType: "1m", winningNumber: 2, winningColor: "red", winningSize: "small" },
+        { periodNumber: "202610200099", timerType: "1m", winningNumber: 5, winningColor: "green_violet", winningSize: "big" },
+        { periodNumber: "202610200098", timerType: "1m", winningNumber: 0, winningColor: "red_violet", winningSize: "small" },
+        { periodNumber: "202610200097", timerType: "1m", winningNumber: 8, winningColor: "red", winningSize: "big" }
+      ],
+      sportsMatches: [
+        { id: 1, sport: "cricket", tournament: "BPL T20 Bangladesh", teamA: "Comilla Victorians", teamB: "Fortune Barishal", oddsA: 1.85, oddsDraw: 12.0, oddsB: 1.98, runsLine: "172.5 Runs", overOdds: 1.88, underOdds: 1.88, score: "142/3 (15.4 ov)", status: "live" },
+        { id: 2, sport: "cricket", tournament: "ICC Champions Trophy", teamA: "Bangladesh", teamB: "India", oddsA: 2.65, oddsDraw: 15.0, oddsB: 1.52, runsLine: "285.5 Runs", overOdds: 1.90, underOdds: 1.85, score: "198/4 (34.2 ov)", status: "live" },
+        { id: 3, sport: "cricket", tournament: "IPL T20 Official", teamA: "Chennai Super Kings", teamB: "Mumbai Indians", oddsA: 1.90, oddsDraw: 14.0, oddsB: 1.92, runsLine: "188.5 Runs", overOdds: 1.87, underOdds: 1.87, score: "Starts 8:00 PM", status: "upcoming" },
+        { id: 4, sport: "football", tournament: "UEFA Champions League", teamA: "Real Madrid", teamB: "Manchester City", oddsA: 2.25, oddsDraw: 3.40, oddsB: 2.90, runsLine: "2.5 Goals", overOdds: 1.75, underOdds: 2.05, score: "1 - 1 (62')", status: "live" }
+      ],
+      giftCodes: [
+        { id: 1, code: "DKWIN2026", amount: 50, maxClaims: 500, claimsCount: 0 },
+        { id: 2, code: "WELCOME100", amount: 100, maxClaims: 200, claimsCount: 0 }
+      ],
+      chatMessages: [
+        { id: 1, username: "DKWIN অফিশিয়াল সাপোর্ট", message: "আসসালামু আলাইকুম! DKWIN ২৪/৭ লাইভ কাস্টমার সাপোর্টে স্বাগতম। যেকোনো সাহায্যের জন্য এখানে মেসেজ দিন অথবা আমাদের অফিসিয়াল টেলিগ্রামে যোগাযোগ করুন।", isSupport: true }
+      ]
+    };
+
+    let state = loadState();
+    let modalType = null; // null, 'auth', 'deposit', 'withdraw', 'chat'
+    let toastMsg = null;
+    let wingoRemaining = 60;
+    let wingoPeriod = "";
+    let lastSettledPeriodByTimer = {};
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          return { ...defaultState, ...parsed, settings: { ...defaultState.settings, ...(parsed.settings || {}) } };
+        }
+      } catch (e) {}
+      return JSON.parse(JSON.stringify(defaultState));
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {}
+    }
+
+    function showToast(text, isError = false) {
+      toastMsg = { text, isError };
+      render();
+      setTimeout(() => {
+        toastMsg = null;
+        render();
+      }, 3200);
+    }
+
+    function getCurrentUser() {
+      return state.users.find(u => u.id === state.currentUserId) || null;
+    }
+
+    function getTimerSeconds(t) {
+      if (t === "30s") return 30;
+      if (t === "3m") return 180;
+      if (t === "5m") return 300;
+      return 60;
+    }
+
+    function getColorForNumber(n) {
+      if (n === 0) return "red_violet";
+      if (n === 5) return "green_violet";
+      return [1, 3, 7, 9].includes(n) ? "green" : "red";
+    }
+
+    function calcWingoPayout(pred, netStake, winNum) {
+      const winSize = winNum >= 5 ? "big" : "small";
+      if (pred === "big") return winSize === "big" ? [netStake * 2, 2] : [0, 0];
+      if (pred === "small") return winSize === "small" ? [netStake * 2, 2] : [0, 0];
+      if (pred === "green") {
+        if ([1, 3, 7, 9].includes(winNum)) return [netStake * 2, 2];
+        if (winNum === 5) return [netStake * 1.5, 1.5];
+        return [0, 0];
+      }
+      if (pred === "red") {
+        if ([2, 4, 6, 8].includes(winNum)) return [netStake * 2, 2];
+        if (winNum === 0) return [netStake * 1.5, 1.5];
+        return [0, 0];
+      }
+      if (pred === "violet") {
+        return [0, 5].includes(winNum) ? [netStake * 4.5, 4.5] : [0, 0];
+      }
+      const num = parseInt(pred, 10);
+      if (!isNaN(num) && num === winNum) return [netStake * 9, 9];
+      return [0, 0];
+    }
+
+    function settleWingoPeriod(periodStr, timerType) {
+      const pending = state.gameBets.filter(b => b.gameType === "wingo" && b.status === "pending" && b.periodNumber === periodStr);
+      const s = state.settings;
+      let winNum = Math.floor(Math.random() * 10);
+
+      if (s.forcedWingoMode === "FORCE_NUMBER" && s.forcedWingoNumber >= 0 && s.forcedWingoNumber <= 9) {
+        winNum = s.forcedWingoNumber;
+      } else if (s.forcedWingoMode === "FORCE_BIG") {
+        winNum = [5, 6, 7, 8, 9][Math.floor(Math.random() * 5)];
+      } else if (s.forcedWingoMode === "FORCE_SMALL") {
+        winNum = [0, 1, 2, 3, 4][Math.floor(Math.random() * 5)];
+      } else if (s.forcedWingoMode === "FORCE_GREEN") {
+        winNum = [1, 3, 5, 7, 9][Math.floor(Math.random() * 5)];
+      } else if (s.forcedWingoMode === "FORCE_RED") {
+        winNum = [0, 2, 4, 6, 8][Math.floor(Math.random() * 5)];
+      } else if (s.forcedWingoMode === "FORCE_VIOLET") {
+        winNum = [0, 5][Math.floor(Math.random() * 2)];
+      } else if (pending.length > 0) {
+        // AUTO_BALANCED: pick lowest payout number 75% of the time
+        let payouts = [];
+        for (let c = 0; c <= 9; c++) {
+          let totalPay = 0;
+          pending.forEach(b => { totalPay += calcWingoPayout(b.prediction, b.netStake, c)[0]; });
+          payouts.push({ num: c, pay: totalPay });
+        }
+        payouts.sort((a, b) => a.pay - b.pay);
+        winNum = payouts[0].num;
+      }
+
+      const winColor = getColorForNumber(winNum);
+      const winSize = winNum >= 5 ? "big" : "small";
+
+      pending.forEach(bet => {
+        const [pay, mult] = calcWingoPayout(bet.prediction, bet.netStake, winNum);
+        bet.status = "settled";
+        bet.isWin = pay > 0;
+        bet.winAmount = pay;
+        bet.multiplier = mult;
+        bet.outcome = `${winNum} (${winSize.toUpperCase()} / ${winColor.toUpperCase()})`;
+        if (pay > 0) {
+          const u = state.users.find(x => x.id === bet.userId);
+          if (u) {
+            u.balance += pay;
+            u.totalWinAmount = (u.totalWinAmount || 0) + pay;
+          }
+        }
+      });
+
+      state.wingoHistory.unshift({
+        periodNumber: periodStr,
+        timerType,
+        winningNumber: winNum,
+        winningColor: winColor,
+        winningSize: winSize
+      });
+      if (state.wingoHistory.length > 35) state.wingoHistory.pop();
+      saveState();
+    }
+
+    // Global 1s synchronized timer loop
+    setInterval(() => {
+      const nowSec = Math.floor(Date.now() / 1000);
+      const dur = getTimerSeconds(state.selectedWingoTimer);
+      const slot = Math.floor(nowSec / dur) % 10000;
+      const d = new Date();
+      const dateStr = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+      const curPeriod = `${dateStr}${String(slot).padStart(4, "0")}`;
+      const rem = dur - (nowSec % dur);
+
+      const prevPeriod = lastSettledPeriodByTimer[state.selectedWingoTimer];
+      if (prevPeriod && prevPeriod !== curPeriod) {
+        settleWingoPeriod(prevPeriod, state.selectedWingoTimer);
+      }
+      lastSettledPeriodByTimer[state.selectedWingoTimer] = curPeriod;
+      wingoPeriod = curPeriod;
+      wingoRemaining = rem;
+
+      const timerEl = document.getElementById("wingo-live-timer");
+      const periodEl = document.getElementById("wingo-live-period");
+      if (timerEl) {
+        const m = String(Math.floor(rem / 60)).padStart(2, "0");
+        const s = String(rem % 60).padStart(2, "0");
+        timerEl.textContent = `${m}:${s}`;
+      }
+      if (periodEl) {
+        periodEl.textContent = curPeriod;
+      }
+    }, 1000);
+
+    // =========================================================================
+    // Actions
+    // =========================================================================
+    window.dkAction = {
+      setTab(tab) {
+        state.activeGame = null;
+        state.activeTab = tab;
+        saveState();
+        render();
+      },
+      openGame(game, subId) {
+        state.activeGame = game;
+        if (game === "crash" && subId) state.selectedCrashVariant = subId;
+        if (game === "slots" && subId) state.selectedSlotId = subId;
+        saveState();
+        render();
+      },
+      setCategory(cat) {
+        state.selectedCategory = cat;
+        render();
+      },
+      setWingoTimer(t) {
+        state.selectedWingoTimer = t;
+        saveState();
+        render();
+      },
+      openModal(m) {
+        if ((m === "deposit" || m === "withdraw") && !getCurrentUser()) {
+          modalType = "auth";
+          showToast("প্রথমে আপনার একাউন্টে লগইন বা রেজিস্টার করুন!", true);
+          return;
+        }
+        modalType = m;
+        render();
+      },
+      closeModal() {
+        modalType = null;
+        render();
+      },
+      registerUser() {
+        const username = document.getElementById("reg-username")?.value?.trim() || "";
+        const phone = document.getElementById("reg-phone")?.value?.trim() || "";
+        const password = document.getElementById("reg-pass")?.value?.trim() || "";
+        const refCode = document.getElementById("reg-ref")?.value?.trim()?.toUpperCase() || "";
+
+        if (username.length < 3 || phone.length < 11 || password.length < 4) {
+          showToast("সঠিক ইউজারনেম, ১১ ডিজিটের মোবাইল নাম্বার এবং পাসওয়ার্ড দিন!", true);
+          return;
+        }
+        if (state.users.some(u => u.phone === phone || u.username.toLowerCase() === username.toLowerCase())) {
+          showToast("এই নাম্বার বা ইউজারনেম দিয়ে ইতিমধ্যে একাউন্ট আছে!", true);
+          return;
+        }
+
+        let validRef = null;
+        if (refCode) {
+          const referrer = state.users.find(u => u.inviteCode === refCode);
+          if (referrer) {
+            validRef = refCode;
+            const bonus = Number(state.settings.referralFixedBonus) || 0;
+            if (bonus > 0) {
+              referrer.balance += bonus;
+              referrer.commissionBalance = (referrer.commissionBalance || 0) + bonus;
+            }
+          }
+        }
+
+        const newUser = {
+          id: Date.now(),
+          username,
+          phone,
+          password,
+          balance: 0.0, // Default balance strictly 0!
+          bonusBalance: 0.0,
+          commissionBalance: 0.0,
+          inviteCode: "DK" + Math.floor(100000 + Math.random() * 900000),
+          referredBy: validRef,
+          totalDeposited: 0,
+          totalWithdrawn: 0,
+          totalBetAmount: 0,
+          totalWinAmount: 0,
+          isBanned: false
+        };
+        state.users.push(newUser);
+        state.currentUserId = newUser.id;
+        modalType = null;
+        saveState();
+        showToast(`স্বাগতম ${username}! একাউন্ট তৈরি হয়েছে (ডিফল্ট ব্যালেন্স ৳0.00)।`);
+      },
+      loginUser() {
+        const idInput = document.getElementById("login-id")?.value?.trim() || "";
+        const passInput = document.getElementById("login-pass")?.value?.trim() || "";
+        const u = state.users.find(x => x.phone === idInput || x.username.toLowerCase() === idInput.toLowerCase());
+        if (!u || u.password !== passInput) {
+          showToast("ভুল নাম্বার বা পাসওয়ার্ড!", true);
+          return;
+        }
+        if (u.isBanned) {
+          showToast("আপনার একাউন্ট ব্যান করা হয়েছে!", true);
+          return;
+        }
+        state.currentUserId = u.id;
+        modalType = null;
+        saveState();
+        showToast(`স্বাগতম ${u.username}! সফলভাবে লগইন হয়েছে।`);
+      },
+      logoutUser() {
+        state.currentUserId = null;
+        saveState();
+        showToast("সফলভাবে লগআউট হয়েছে");
+      },
+      submitDeposit() {
+        const u = getCurrentUser();
+        if (!u) return;
+        const method = document.getElementById("dep-method")?.value || "bkash";
+        const amount = parseFloat(document.getElementById("dep-amount")?.value || "0");
+        const sender = document.getElementById("dep-sender")?.value?.trim() || "";
+        const trxId = document.getElementById("dep-trx")?.value?.trim()?.toUpperCase() || "";
+
+        if (amount < state.settings.minDeposit) {
+          showToast(`সর্বনিম্ন ডিপোজিট ৳${state.settings.minDeposit} টাকা!`, true);
+          return;
+        }
+        if (sender.length < 11 || trxId.length < 4) {
+          showToast("সঠিক ১১ ডিজিট প্রেরক নাম্বার ও TrxID দিন!", true);
+          return;
+        }
+
+        const ruleMap = {
+          bkash: state.settings.bkashRule,
+          nagad: state.settings.nagadRule,
+          rocket: state.settings.rocketRule,
+          upay: state.settings.upayRule
+        };
+
+        state.transactions.unshift({
+          id: Date.now(),
+          userId: u.id,
+          username: u.username,
+          phone: u.phone,
+          type: "deposit",
+          amount,
+          method,
+          paymentMode: ruleMap[method] || "Send Money",
+          accountNumber: sender,
+          trxId,
+          status: "pending",
+          note: state.settings.pendingProcessingNotice
+        });
+        modalType = null;
+        saveState();
+        showToast("ডিপোজিট রিকোয়েস্ট পেন্ডিং (Pending) এ জমা হয়েছে! ২-১০ মিনিট অপেক্ষা করুন।");
+      },
+      submitWithdraw() {
+        const u = getCurrentUser();
+        if (!u) return;
+        const method = document.getElementById("wd-method")?.value || "bkash";
+        const amount = parseFloat(document.getElementById("wd-amount")?.value || "0");
+        const receiver = document.getElementById("wd-number")?.value?.trim() || "";
+        const pass = document.getElementById("wd-pass")?.value?.trim() || "";
+
+        if (u.password !== pass) {
+          showToast("আপনার লগইন পাসওয়ার্ড সঠিক নয়!", true);
+          return;
+        }
+        if (amount < state.settings.minWithdraw) {
+          showToast(`সর্বনিম্ন উইথড্র ৳${state.settings.minWithdraw} টাকা!`, true);
+          return;
+        }
+        if (u.balance < amount) {
+          showToast("আপনার একাউন্টে পর্যাপ্ত ব্যালেন্স নেই!", true);
+          return;
+        }
+        if (receiver.length < 11) {
+          showToast("সঠিক ১১ ডিজিটের পার্সোনাল নাম্বার দিন!", true);
+          return;
+        }
+
+        // Deduct immediately upon request submission so user cannot double-withdraw
+        u.balance -= amount;
+        state.transactions.unshift({
+          id: Date.now(),
+          userId: u.id,
+          username: u.username,
+          phone: u.phone,
+          type: "withdraw",
+          amount,
+          method,
+          paymentMode: "Personal",
+          accountNumber: receiver,
+          trxId: "WD" + String(Date.now()).slice(-6),
+          status: "pending",
+          note: state.settings.pendingProcessingNotice
+        });
+        modalType = null;
+        saveState();
+        showToast("উইথড্র রিকোয়েস্ট পেন্ডিং (Pending) এ জমা হয়েছে! ২-১০ মিনিটের মধ্যে পেমেন্ট পাবেন।");
+      },
+      placeWingoBet(prediction) {
+        const u = getCurrentUser();
+        if (!u) {
+          modalType = "auth";
+          showToast("বেট করতে প্রথমে লগইন করুন!", true);
+          return;
+        }
+        if (wingoRemaining <= 4) {
+          showToast("এই রাউন্ড লকড! পরবর্তী রাউন্ডের জন্য অপেক্ষা করুন।", true);
+          return;
+        }
+        const amtInput = parseFloat(document.getElementById("wingo-bet-input")?.value || "10");
+        if (amtInput < state.settings.minBet) {
+          showToast(`সর্বনিম্ন বেট ৳${state.settings.minBet} টাকা!`, true);
+          return;
+        }
+        if (u.balance < amtInput) {
+          modalType = "deposit";
+          showToast("পর্যাপ্ত ব্যালেন্স নেই! অনুগ্রহ করে ডিপোজিট করুন।", true);
+          return;
+        }
+
+        const fee = (amtInput * (Number(state.settings.wingoFeePercent) || 2)) / 100.0;
+        const netStake = amtInput - fee;
+        u.balance -= amtInput;
+        u.totalBetAmount = (u.totalBetAmount || 0) + amtInput;
+
+        // Credit referral bet commission
+        if (u.referredBy && state.settings.referralBetCommissionPercent > 0) {
+          const refUser = state.users.find(x => x.inviteCode === u.referredBy);
+          if (refUser) {
+            const comm = (amtInput * state.settings.referralBetCommissionPercent) / 100.0;
+            refUser.balance += comm;
+            refUser.commissionBalance = (refUser.commissionBalance || 0) + comm;
+          }
+        }
+
+        state.gameBets.unshift({
+          id: Date.now(),
+          userId: u.id,
+          username: u.username,
+          gameType: "wingo",
+          betAmount: amtInput,
+          feeAmount: fee,
+          netStake,
+          winAmount: 0,
+          multiplier: 0,
+          prediction,
+          outcome: "",
+          status: "pending",
+          isWin: false,
+          periodNumber: wingoPeriod,
+          timerType: state.selectedWingoTimer
+        });
+        saveState();
+        showToast(`বেট সফল: ${prediction.toUpperCase()} (৳${amtInput}) [সার্ভিস ফি: ৳${fee.toFixed(2)}]`);
+      },
+      playQuickGame(gameType, label, winChancePercent, mult) {
+        const u = getCurrentUser();
+        if (!u) {
+          modalType = "auth";
+          showToast("খেলতে প্রথমে লগইন করুন!", true);
+          return;
+        }
+        const amt = parseFloat(document.getElementById("quick-bet-input")?.value || "10");
+        if (amt < state.settings.minBet) {
+          showToast(`সর্বনিম্ন বেট ৳${state.settings.minBet} টাকা!`, true);
+          return;
+        }
+        if (u.balance < amt) {
+          modalType = "deposit";
+          showToast("পর্যাপ্ত ব্যালেন্স নেই! রিচার্জ করুন।", true);
+          return;
+        }
+        const fee = (amt * state.settings.wingoFeePercent) / 100.0;
+        const net = amt - fee;
+        u.balance -= amt;
+        u.totalBetAmount = (u.totalBetAmount || 0) + amt;
+
+        const isWin = (Math.random() * 100) < winChancePercent;
+        const winAmt = isWin ? net * mult : 0;
+        if (isWin) {
+          u.balance += winAmt;
+          u.totalWinAmount = (u.totalWinAmount || 0) + winAmt;
+        }
+        state.gameBets.unshift({
+          id: Date.now(),
+          userId: u.id,
+          username: u.username,
+          gameType,
+          betAmount: amt,
+          feeAmount: fee,
+          netStake: net,
+          winAmount: winAmt,
+          multiplier: isWin ? mult : 0,
+          prediction: label,
+          outcome: isWin ? `WON (${mult}x)` : "LOST",
+          status: "settled",
+          isWin
+        });
+        saveState();
+        if (isWin) showToast(`অভিনন্দন! আপনি +৳${winAmt.toFixed(0)} (${mult}x) জিতেছেন!`);
+        else showToast("দুঃখিত! এবার জিততে পারেননি, আবার চেষ্টা করুন।", true);
+      },
+      toggleMultiSlip(matchId, matchTitle, pickName, odds) {
+        const idx = state.multiBetSlip.findIndex(x => x.matchId === matchId);
+        if (idx >= 0) {
+          if (state.multiBetSlip[idx].pickName === pickName) state.multiBetSlip.splice(idx, 1);
+          else state.multiBetSlip[idx] = { matchId, matchTitle, pickName, odds };
+        } else {
+          state.multiBetSlip.push({ matchId, matchTitle, pickName, odds });
+        }
+        saveState();
+        render();
+      },
+      placeMultiSportsBet() {
+        const u = getCurrentUser();
+        if (!u) {
+          modalType = "auth";
+          showToast("বেট প্লেস করতে লগইন করুন!", true);
+          return;
+        }
+        if (state.multiBetSlip.length === 0) return;
+        const amt = parseFloat(document.getElementById("sports-bet-input")?.value || "50");
+        if (u.balance < amt) {
+          modalType = "deposit";
+          showToast("পর্যাপ্ত ব্যালেন্স নেই!", true);
+          return;
+        }
+        const totalOdds = Number(state.multiBetSlip.reduce((acc, x) => acc * x.odds, 1).toFixed(2));
+        const fee = (amt * state.settings.wingoFeePercent) / 100.0;
+        const net = amt - fee;
+        u.balance -= amt;
+        u.totalBetAmount = (u.totalBetAmount || 0) + amt;
+
+        state.gameBets.unshift({
+          id: Date.now(),
+          userId: u.id,
+          username: u.username,
+          gameType: "sports_multi",
+          betAmount: amt,
+          feeAmount: fee,
+          netStake: net,
+          winAmount: 0,
+          multiplier: totalOdds,
+          prediction: state.multiBetSlip.map(s => `${s.matchTitle}: ${s.pickName} (@${s.odds})`).join(" + "),
+          outcome: "Pending",
+          status: "pending",
+          isWin: false
+        });
+        state.multiBetSlip = [];
+        saveState();
+        showToast(`1xBet মাল্টি স্লিপ সাবমিট হয়েছে! মোট অডস: ${totalOdds}x`);
+      },
+      // Admin Functions
+      adminLogin() {
+        const pin = document.getElementById("admin-pin-input")?.value?.trim() || "";
+        if (pin === state.settings.adminPin) {
+          state.isAdminLoggedIn = true;
+          saveState();
+          showToast("মাস্টার এডমিন প্যানেলে স্বাগতম!");
+        } else {
+          showToast("ভুল এডমিন পিন!", true);
+        }
+      },
+      adminSetWingoMode(mode, num = -1) {
+        state.settings.forcedWingoMode = mode;
+        state.settings.forcedWingoNumber = num;
+        saveState();
+        showToast(`Win Go রেজাল্ট মোড সেট হয়েছে: ${mode} ${num >= 0 ? "#" + num : ""}`);
+      },
+      // Strictly Idempotent Deposit & Withdraw Processing
+      adminProcessTxn(txnId, approve) {
+        const txn = state.transactions.find(t => t.id === txnId);
+        if (!txn || txn.status !== "pending") {
+          showToast("এই রিকোয়েস্টটি ইতিমধ্যে প্রসেস করা হয়েছে! পুনরায় প্রসেস হবে না।", true);
+          return;
+        }
+        const u = state.users.find(x => x.id === txn.userId);
+        if (txn.type === "deposit") {
+          if (approve) {
+            txn.status = "completed";
+            const bonus = (txn.amount * state.settings.depositBonusPercent) / 100.0;
+            if (u) {
+              u.balance += (txn.amount + bonus);
+              u.totalDeposited = (u.totalDeposited || 0) + txn.amount;
+              if (u.referredBy && state.settings.referralDepositCommissionPercent > 0) {
+                const refU = state.users.find(r => r.inviteCode === u.referredBy);
+                if (refU) {
+                  const comm = (txn.amount * state.settings.referralDepositCommissionPercent) / 100.0;
+                  refU.balance += comm;
+                  refU.commissionBalance = (refU.commissionBalance || 0) + comm;
+                }
+              }
+            }
+            showToast("ডিপোজিট অনুমোদিত হয়েছে এবং ব্যালেন্স যোগ হয়েছে!");
+          } else {
+            txn.status = "rejected";
+            showToast("ডিপোজিট রিকোয়েস্ট বাতিল করা হয়েছে।", true);
+          }
+        } else if (txn.type === "withdraw") {
+          if (approve) {
+            // Balance was already deducted on submission. Mark completed ONCE and never add to balance!
+            txn.status = "completed";
+            if (u) u.totalWithdrawn = (u.totalWithdrawn || 0) + txn.amount;
+            showToast("উইথড্র কমপ্লিট (Paid) করা হয়েছে!");
+          } else {
+            txn.status = "rejected";
+            if (u) u.balance += txn.amount;
+            showToast("উইথড্র বাতিল করে ইউজারের ব্যালেন্স রিফান্ড করা হয়েছে।", true);
+          }
+        }
+        saveState();
+      },
+      adminSaveSettings() {
+        const s = state.settings;
+        s.bkashNumber = document.getElementById("set-bkash")?.value || s.bkashNumber;
+        s.bkashRule = document.getElementById("set-bkash-rule")?.value || s.bkashRule;
+        s.nagadNumber = document.getElementById("set-nagad")?.value || s.nagadNumber;
+        s.nagadRule = document.getElementById("set-nagad-rule")?.value || s.nagadRule;
+        s.pendingProcessingNotice = document.getElementById("set-pending-msg")?.value || s.pendingProcessingNotice;
+        s.wingoFeePercent = parseFloat(document.getElementById("set-fee")?.value || s.wingoFeePercent);
+        s.forcedCrashMultiplier = parseFloat(document.getElementById("set-crash")?.value || s.forcedCrashMultiplier);
+        s.referralDepositCommissionPercent = parseFloat(document.getElementById("set-ref-comm")?.value || s.referralDepositCommissionPercent);
+        s.telegramSupportUsername = document.getElementById("set-tg")?.value || s.telegramSupportUsername;
+        saveState();
+        showToast("সকল এডমিন সেটিংস সফলভাবে সেভ হয়েছে!");
+      },
+      adminAddMatch() {
+        const tournament = document.getElementById("m-tourn")?.value?.trim() || "BPL T20";
+        const teamA = document.getElementById("m-teama")?.value?.trim() || "";
+        const teamB = document.getElementById("m-teamb")?.value?.trim() || "";
+        const oddsA = parseFloat(document.getElementById("m-oddsa")?.value || "1.85");
+        const oddsB = parseFloat(document.getElementById("m-oddsb")?.value || "1.95");
+        if (!teamA || !teamB) {
+          showToast("টিম ১ ও টিম ২ এর নাম দিন!", true);
+          return;
+        }
+        state.sportsMatches.unshift({
+          id: Date.now(),
+          sport: "cricket",
+          tournament,
+          teamA,
+          teamB,
+          oddsA,
+          oddsDraw: 10.0,
+          oddsB,
+          runsLine: "170.5 Runs",
+          overOdds: 1.88,
+          underOdds: 1.88,
+          score: "LIVE 0/0",
+          status: "live"
+        });
+        saveState();
+        showToast("নতুন ক্রিকেট ম্যাচ যুক্ত হয়েছে!");
+      }
+    };
+
+    // =========================================================================
+    // UI Render
+    // =========================================================================
+    function render() {
+      const root = document.getElementById("app");
+      const user = getCurrentUser();
+      const s = state.settings;
+
+      // Calculate live Win Go bet breakdown for Admin Panel
+      const pendingWingo = state.gameBets.filter(b => b.gameType === "wingo" && b.status === "pending");
+      let bigSum = 0, smallSum = 0, greenSum = 0, redSum = 0, violetSum = 0;
+      pendingWingo.forEach(b => {
+        if (b.prediction === "big") bigSum += b.betAmount;
+        if (b.prediction === "small") smallSum += b.betAmount;
+        if (b.prediction === "green") greenSum += b.betAmount;
+        if (b.prediction === "red") redSum += b.betAmount;
+        if (b.prediction === "violet") violetSum += b.betAmount;
+      });
+
+      let mainContent = "";
+
+      if (state.activeGame === "wingo") {
+        mainContent = `
+          <div class="p-3 space-y-3">
+            <div class="flex items-center justify-between bg-slate-900 p-3 rounded-2xl border border-amber-500/30">
+              <button onclick="dkAction.setTab('home')" class="px-3 py-1 bg-slate-800 rounded-lg text-xs font-bold">← ফিরে যান</button>
+              <div class="text-center">
+                <div class="text-amber-400 font-black text-sm">DKWIN WIN GO লটারী</div>
+                <div class="text-[10px] text-slate-400">মিনিমাম বেট ৳${s.minBet} · সার্ভিস ফি ${s.wingoFeePercent}%</div>
+              </div>
+              <div class="text-amber-400 font-black text-xs">৳${(user?.balance || 0).toFixed(2)}</div>
+            </div>
+
+            <div class="grid grid-cols-4 gap-1.5 bg-slate-900 p-1.5 rounded-xl">
+              ${["30s", "1m", "3m", "5m"].map(t => `
+                <button onclick="dkAction.setWingoTimer('${t}')" class="py-1.5 rounded-lg text-xs font-bold ${state.selectedWingoTimer === t ? 'bg-amber-500 text-slate-950' : 'text-slate-400'}">WinGo ${t}</button>
+              `).join("")}
+            </div>
+
+            <div class="bg-gradient-to-r from-emerald-950 via-slate-900 to-amber-950 p-4 rounded-2xl border border-amber-500/40 flex justify-between items-center">
+              <div>
+                <div class="text-[11px] text-slate-400">চলমান পিরিয়ড (${state.selectedWingoTimer})</div>
+                <div id="wingo-live-period" class="text-base font-black text-amber-300 font-mono">${wingoPeriod || "Loading..."}</div>
+              </div>
+              <div class="text-right">
+                <div class="text-[10px] text-emerald-400 font-bold">বাকি সময়</div>
+                <div id="wingo-live-timer" class="text-2xl font-black text-emerald-400 font-mono">00:${String(wingoRemaining).padStart(2, "0")}</div>
+              </div>
+            </div>
+
+            <div class="bg-slate-900 p-3 rounded-2xl space-y-3 border border-slate-800">
+              <div class="grid grid-cols-3 gap-2">
+                <button onclick="dkAction.placeWingoBet('green')" class="py-3 rounded-xl bg-emerald-600 font-black text-xs">সবুজ (Green) 2x</button>
+                <button onclick="dkAction.placeWingoBet('violet')" class="py-3 rounded-xl bg-purple-600 font-black text-xs">বেগুনী (Violet) 4.5x</button>
+                <button onclick="dkAction.placeWingoBet('red')" class="py-3 rounded-xl bg-red-600 font-black text-xs">লাল (Red) 2x</button>
+              </div>
+
+              <div class="grid grid-cols-5 gap-2">
+                ${[0,1,2,3,4,5,6,7,8,9].map(n => `
+                  <button onclick="dkAction.placeWingoBet('${n}')" class="py-2.5 rounded-xl font-black text-sm ${n % 2 === 0 ? 'bg-red-700' : 'bg-emerald-700'} border border-white/20">${n}<span class="block text-[9px]">9x</span></button>
+                `).join("")}
+              </div>
+
+              <div class="grid grid-cols-2 gap-2">
+                <button onclick="dkAction.placeWingoBet('big')" class="py-3 rounded-xl bg-amber-500 text-slate-950 font-black text-xs">BIG (৫-৯) · 2x</button>
+                <button onclick="dkAction.placeWingoBet('small')" class="py-3 rounded-xl bg-sky-500 text-slate-950 font-black text-xs">SMALL (০-৪) · 2x</button>
+              </div>
+
+              <div class="pt-2 border-t border-slate-800 space-y-2">
+                <label class="text-xs font-bold text-slate-300">বেট এমাউন্ট লিখুন (সর্বনিম্ন ৳১ টাকা):</label>
+                <input id="wingo-bet-input" type="number" value="10" min="1" class="w-full bg-slate-950 border border-amber-500/40 rounded-xl px-3 py-2 text-sm font-black text-amber-400" />
+              </div>
+            </div>
+
+            <div class="bg-slate-900 p-3 rounded-2xl border border-slate-800 space-y-2">
+              <div class="text-xs font-black text-amber-400">সর্বশেষ রেজাল্ট হিস্ট্রি</div>
+              ${state.wingoHistory.slice(0, 8).map(h => `
+                <div class="flex justify-between text-xs border-b border-slate-800 pb-1">
+                  <span class="font-mono text-slate-400">${h.periodNumber}</span>
+                  <span class="font-black text-white">#${h.winningNumber}</span>
+                  <span class="font-bold text-amber-400 uppercase">${h.winningSize}</span>
+                  <span class="font-bold text-emerald-400 uppercase">${h.winningColor}</span>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      } else if (state.activeGame === "crash" || state.activeGame === "thimbles" || state.activeGame === "slots") {
+        const isCrash = state.activeGame === "crash";
+        const isThimbles = state.activeGame === "thimbles";
+        mainContent = `
+          <div class="p-3 space-y-3">
+            <div class="flex items-center justify-between bg-slate-900 p-3 rounded-2xl border border-amber-500/30">
+              <button onclick="dkAction.setTab('home')" class="px-3 py-1 bg-slate-800 rounded-lg text-xs font-bold">← ফিরে যান</button>
+              <div class="font-black text-amber-400 text-sm">${isCrash ? '✈️ 4x CRASH PLANE GAMES' : isThimbles ? '🏆 THIMBLES (থাম্বিল গেম)' : '🎰 JILI & PRAGMATIC SLOTS'}</div>
+              <div class="text-amber-400 font-black text-xs">৳${(user?.balance || 0).toFixed(2)}</div>
+            </div>
+
+            <div class="bg-slate-900 p-5 rounded-2xl border border-amber-500/40 text-center space-y-4">
+              <div class="text-5xl">${isCrash ? '✈️ 🚀 🛩️ 🏏' : isThimbles ? '🏺 ⚽ 🏺' : '🃏 👑 💎 🐯'}</div>
+              <div class="text-sm font-bold text-slate-300">
+                ${isCrash ? 'Aviator / JetX / SpaceXY / Crash Cricket X' : isThimbles ? '৩টি কাপের নিচে লুকানো বল খুঁজুন (2.88x পেআউট)' : 'JILI Super Ace, Golden Empire, Fortune Gems & Fortune Tiger'}
+              </div>
+              <input id="quick-bet-input" type="number" value="10" min="1" class="w-full bg-slate-950 border border-amber-500/40 rounded-xl px-3 py-2 text-center text-sm font-black text-amber-400" placeholder="বেট টাকা (৳১+)" />
+              <button onclick="dkAction.playQuickGame('${state.activeGame}', '${state.activeGame.toUpperCase()}', ${isThimbles ? s.thimblesWinRatePercent : s.slotsWinRatePercent}, ${isThimbles ? 2.88 : 2.20})" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black text-sm">
+                🎮 এখনই বেট ও প্লে করুন
+              </button>
+            </div>
+          </div>
+        `;
+      } else if (state.activeGame === "sports") {
+        const combinedOdds = state.multiBetSlip.reduce((a, b) => a * b.odds, 1).toFixed(2);
+        mainContent = `
+          <div class="p-3 space-y-3">
+            <div class="flex items-center justify-between bg-slate-900 p-3 rounded-2xl border border-emerald-500/30">
+              <button onclick="dkAction.setTab('home')" class="px-3 py-1 bg-slate-800 rounded-lg text-xs font-bold">← ফিরে যান</button>
+              <div class="font-black text-emerald-400 text-sm">🏏 1xBet ক্রিকেট ও মাল্টি স্পোর্টস</div>
+              <div class="text-amber-400 font-black text-xs">৳${(user?.balance || 0).toFixed(2)}</div>
+            </div>
+
+            ${state.sportsMatches.map(m => `
+              <div class="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 space-y-2">
+                <div class="flex justify-between text-[11px] text-amber-400 font-bold">
+                  <span>${m.tournament}</span>
+                  <span class="text-red-400">🔴 ${m.score}</span>
+                </div>
+                <div class="flex justify-between font-black text-sm">
+                  <span>${m.teamA}</span>
+                  <span class="text-amber-400">VS</span>
+                  <span>${m.teamB}</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2 pt-1">
+                  <button onclick="dkAction.toggleMultiSlip(${m.id}, '${m.teamA} vs ${m.teamB}', '${m.teamA}', ${m.oddsA})" class="py-2 rounded-xl bg-slate-800 hover:bg-emerald-600 text-xs font-bold">W1 (${m.oddsA}x)</button>
+                  <button onclick="dkAction.toggleMultiSlip(${m.id}, '${m.teamA} vs ${m.teamB}', 'Over ${m.runsLine}', ${m.overOdds})" class="py-2 rounded-xl bg-slate-800 hover:bg-emerald-600 text-xs font-bold">Over (${m.overOdds}x)</button>
+                  <button onclick="dkAction.toggleMultiSlip(${m.id}, '${m.teamA} vs ${m.teamB}', '${m.teamB}', ${m.oddsB})" class="py-2 rounded-xl bg-slate-800 hover:bg-emerald-600 text-xs font-bold">W2 (${m.oddsB}x)</button>
+                </div>
+              </div>
+            `).join("")}
+
+            ${state.multiBetSlip.length > 0 ? `
+              <div class="bg-emerald-950/90 border border-emerald-500 p-3.5 rounded-2xl space-y-2">
+                <div class="text-xs font-black text-emerald-300">🔥 1xBet মাল্টি বেট স্লিপ (${state.multiBetSlip.length}টি সিলেকশন) · মোট অডস: ${combinedOdds}x</div>
+                <input id="sports-bet-input" type="number" value="50" min="1" class="w-full bg-slate-950 border border-emerald-500/40 rounded-xl px-3 py-2 text-xs font-black text-white" />
+                <button onclick="dkAction.placeMultiSportsBet()" class="w-full py-3 rounded-xl bg-emerald-500 text-slate-950 font-black text-xs">মাল্টি বেট প্লেস করুন</button>
+              </div>
+            ` : ""}
+          </div>
+        `;
+      } else if (state.activeTab === "admin") {
+        if (!state.isAdminLoggedIn) {
+          mainContent = `
+            <div class="p-6">
+              <div class="bg-slate-900 border border-amber-500/40 rounded-3xl p-6 space-y-4 text-center">
+                <div class="text-xl font-black text-amber-400">🛡️ DKWIN মাস্টার এডমিন প্যানেল</div>
+                <p class="text-xs text-slate-400">Win Go রেজাল্ট কন্ট্রোল, ক্র্যাশ, ডিপোজিট/উইথড্র ও ক্রিকেট ম্যাচ ম্যানেজমেন্ট</p>
+                <input id="admin-pin-input" type="password" value="admin1234" placeholder="এডমিন পিন (admin1234)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-center text-white" />
+                <button onclick="dkAction.adminLogin()" class="w-full py-3 rounded-xl bg-amber-500 text-slate-950 font-black text-xs">এডমিন ড্যাশবোর্ডে প্রবেশ করুন</button>
+              </div>
+            </div>
+          `;
+        } else {
+          const totalAllBets = state.users.reduce((a, b) => a + (b.totalBetAmount || 0), 0);
+          mainContent = `
+            <div class="p-3 space-y-4">
+              <div class="bg-slate-900 border border-amber-500/40 p-4 rounded-2xl space-y-2">
+                <div class="flex justify-between items-center">
+                  <span class="font-black text-amber-400 text-sm">🛡️ DKWIN মাস্টার এডমিন কন্ট্রোল</span>
+                  <span class="text-xs text-emerald-400 font-bold">মোট ইউজার বেট: ৳${totalAllBets.toFixed(0)}</span>
+                </div>
+                <div class="grid grid-cols-5 gap-1.5 text-center text-[10px]">
+                  <div class="bg-slate-950 p-2 rounded-lg"><span class="text-amber-400 block font-bold">BIG</span>৳${bigSum}</div>
+                  <div class="bg-slate-950 p-2 rounded-lg"><span class="text-sky-400 block font-bold">SMALL</span>৳${smallSum}</div>
+                  <div class="bg-slate-950 p-2 rounded-lg"><span class="text-emerald-400 block font-bold">GREEN</span>৳${greenSum}</div>
+                  <div class="bg-slate-950 p-2 rounded-lg"><span class="text-red-400 block font-bold">RED</span>৳${redSum}</div>
+                  <div class="bg-slate-950 p-2 rounded-lg"><span class="text-purple-400 block font-bold">VIOLET</span>৳${violetSum}</div>
+                </div>
+                <div class="text-xs font-bold text-slate-300 pt-1">Win Go পরবর্তী রেজাল্ট কন্ট্রোল (বর্তমান: ${s.forcedWingoMode} ${s.forcedWingoNumber >= 0 ? '#' + s.forcedWingoNumber : ''}):</div>
+                <div class="grid grid-cols-3 gap-1.5 text-[10px] font-black">
+                  <button onclick="dkAction.adminSetWingoMode('AUTO_BALANCED')" class="py-2 rounded-lg bg-slate-800 text-sky-300">অটো ব্যালেন্সড</button>
+                  <button onclick="dkAction.adminSetWingoMode('FORCE_BIG')" class="py-2 rounded-lg bg-amber-500 text-slate-950">FORCE BIG</button>
+                  <button onclick="dkAction.adminSetWingoMode('FORCE_SMALL')" class="py-2 rounded-lg bg-sky-500 text-slate-950">FORCE SMALL</button>
+                  <button onclick="dkAction.adminSetWingoMode('FORCE_GREEN')" class="py-2 rounded-lg bg-emerald-600 text-white">FORCE GREEN</button>
+                  <button onclick="dkAction.adminSetWingoMode('FORCE_RED')" class="py-2 rounded-lg bg-red-600 text-white">FORCE RED</button>
+                  <button onclick="dkAction.adminSetWingoMode('FORCE_VIOLET')" class="py-2 rounded-lg bg-purple-600 text-white">FORCE VIOLET</button>
+                </div>
+                <div class="grid grid-cols-10 gap-1 pt-1">
+                  ${[0,1,2,3,4,5,6,7,8,9].map(n => `
+                    <button onclick="dkAction.adminSetWingoMode('FORCE_NUMBER', ${n})" class="py-1.5 rounded bg-slate-800 hover:bg-amber-500 hover:text-black text-xs font-black">${n}</button>
+                  `).join("")}
+                </div>
+              </div>
+
+              <!-- Pending Deposits & Withdrawals (Strictly Idempotent) -->
+              <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-2">
+                <div class="font-black text-xs text-emerald-400">ডিপোজিট ও উইথড্র রিকোয়েস্ট অ্যাপ্রুভাল (${state.transactions.length})</div>
+                ${state.transactions.length === 0 ? `<div class="text-xs text-slate-500">কোনো রিকোয়েস্ট নেই</div>` : state.transactions.map(t => `
+                  <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 space-y-1 text-xs">
+                    <div class="flex justify-between font-bold">
+                      <span>${t.username} (${t.type.toUpperCase()} - ${t.method.toUpperCase()})</span>
+                      <span class="text-amber-400">৳${t.amount}</span>
+                    </div>
+                    <div class="text-[10px] text-slate-400">নাম্বার: ${t.accountNumber} | TrxID: ${t.trxId}</div>
+                    ${t.status === "pending" ? `
+                      <div class="flex gap-2 pt-1">
+                        <button onclick="dkAction.adminProcessTxn(${t.id}, true)" class="flex-1 py-1.5 rounded bg-emerald-600 text-white font-black text-[10px]">✅ Approve / Paid</button>
+                        <button onclick="dkAction.adminProcessTxn(${t.id}, false)" class="flex-1 py-1.5 rounded bg-red-700 text-white font-black text-[10px]">❌ Reject</button>
+                      </div>
+                    ` : `<div class="text-[10px] font-black ${t.status === 'completed' ? 'text-emerald-400' : 'text-red-400'}">স্ট্যাটাস লকড: ${t.status.toUpperCase()}</div>`}
+                  </div>
+                `).join("")}
+              </div>
+
+              <!-- Settings & Rules -->
+              <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-2 text-xs">
+                <div class="font-black text-amber-400">পেমেন্ট নাম্বার, নিয়ম (Send Money/Cash Out), ফি % ও টেলিগ্রাম</div>
+                <div class="grid grid-cols-2 gap-2">
+                  <input id="set-bkash" value="${s.bkashNumber}" class="bg-slate-950 border border-slate-800 rounded-lg p-2" placeholder="বিকাশ নাম্বার" />
+                  <input id="set-bkash-rule" value="${s.bkashRule}" class="bg-slate-950 border border-slate-800 rounded-lg p-2" placeholder="বিকাশ নিয়ম" />
+                  <input id="set-nagad" value="${s.nagadNumber}" class="bg-slate-950 border border-slate-800 rounded-lg p-2" placeholder="নগদ নাম্বার" />
+                  <input id="set-nagad-rule" value="${s.nagadRule}" class="bg-slate-950 border border-slate-800 rounded-lg p-2" placeholder="নগদ নিয়ম" />
+                  <input id="set-fee" type="number" value="${s.wingoFeePercent}" class="bg-slate-950 border border-slate-800 rounded-lg p-2" placeholder="WinGo ফি %" />
+                  <input id="set-crash" type="number" value="${s.forcedCrashMultiplier}" class="bg-slate-950 border border-slate-800 rounded-lg p-2" placeholder="ক্র্যাশ পয়েন্ট" />
+                  <input id="set-ref-comm" type="number" value="${s.referralDepositCommissionPercent}" class="bg-slate-950 border border-slate-800 rounded-lg p-2" placeholder="রেফার কমিশন %" />
+                  <input id="set-tg" value="${s.telegramSupportUsername}" class="bg-slate-950 border border-slate-800 rounded-lg p-2" placeholder="টেলিগ্রাম ইউজারনেম" />
+                </div>
+                <input id="set-pending-msg" value="${s.pendingProcessingNotice}" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2" placeholder="২-১০ মিনিট পেন্ডিং মেসেজ" />
+                <button onclick="dkAction.adminSaveSettings()" class="w-full py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-black">💾 সেটিংস সেভ করুন</button>
+              </div>
+
+              <!-- Add Cricket Match -->
+              <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl space-y-2 text-xs">
+                <div class="font-black text-emerald-400">🏏 নতুন ক্রিকেট / স্পোর্টস ম্যাচ যুক্ত করুন</div>
+                <div class="grid grid-cols-2 gap-2">
+                  <input id="m-tourn" value="BPL T20" class="bg-slate-950 border border-slate-800 rounded-lg p-2" placeholder="টুর্নামেন্ট" />
+                  <input id="m-teama" placeholder="টিম ১ (Team A)" class="bg-slate-950 border border-slate-800 rounded-lg p-2" />
+                  <input id="m-teamb" placeholder="টিম ২ (Team B)" class="bg-slate-950 border border-slate-800 rounded-lg p-2" />
+                  <input id="m-oddsa" value="1.85" class="bg-slate-950 border border-slate-800 rounded-lg p-2" placeholder="Odds A" />
+                  <input id="m-oddsb" value="1.95" class="bg-slate-950 border border-slate-800 rounded-lg p-2" placeholder="Odds B" />
+                </div>
+                <button onclick="dkAction.adminAddMatch()" class="w-full py-2.5 rounded-xl bg-amber-500 text-slate-950 font-black">➕ ম্যাচ যুক্ত করুন</button>
+              </div>
+            </div>
+          `;
+        }
+      } else if (state.activeTab === "wallet") {
+        const myTxns = state.transactions.filter(t => t.userId === user?.id);
+        mainContent = `
+          <div class="p-3 space-y-3">
+            <div class="bg-gradient-to-br from-emerald-950 via-slate-900 to-indigo-950 p-5 rounded-2xl border border-amber-500/40 space-y-3">
+              <div class="text-xs text-slate-400">মূল ওয়ালেট ব্যালেন্স</div>
+              <div class="text-3xl font-black text-amber-400 font-mono">৳${(user?.balance || 0).toFixed(2)}</div>
+              <div class="flex gap-2">
+                <button onclick="dkAction.openModal('deposit')" class="flex-1 py-3 rounded-xl bg-emerald-500 text-slate-950 font-black text-xs">➕ ডিপোজিট (৳${s.minDeposit}+)</button>
+                <button onclick="dkAction.openModal('withdraw')" class="flex-1 py-3 rounded-xl bg-amber-500 text-slate-950 font-black text-xs">⬆️ উইথড্র (৳${s.minWithdraw}+)</button>
+              </div>
+            </div>
+
+            <div class="bg-amber-950/30 border border-amber-500/30 p-3 rounded-xl text-xs text-amber-300 font-semibold">
+              ⏳ ${s.pendingProcessingNotice}
+            </div>
+
+            <div class="bg-slate-900 p-3.5 rounded-2xl border border-slate-800 space-y-2">
+              <div class="text-xs font-black text-white">আমার ডিপোজিট ও উইথড্র রিকোয়েস্ট হিস্ট্রি</div>
+              ${myTxns.length === 0 ? `<div class="text-xs text-slate-500 py-4 text-center">কোনো লেনদেন নেই</div>` : myTxns.map(t => `
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-1 text-xs">
+                  <div class="flex justify-between font-black">
+                    <span>${t.type.toUpperCase()} · ${t.method.toUpperCase()} (${t.paymentMode})</span>
+                    <span class="${t.status === 'completed' ? 'text-emerald-400' : t.status === 'pending' ? 'text-amber-400' : 'text-red-400'}">৳${t.amount} (${t.status.toUpperCase()})</span>
+                  </div>
+                  ${t.status === "pending" ? `<div class="text-[10px] text-amber-300">${s.pendingProcessingNotice}</div>` : ""}
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        `;
+      } else {
+        // HOME TAB
+        mainContent = `
+          <div class="p-3 space-y-3">
+            <div class="bg-slate-900 border border-amber-500/30 px-3 py-2 rounded-xl text-xs text-amber-300 font-semibold">
+              📢 ${s.siteNotice}
+            </div>
+
+            <div class="bg-gradient-to-r from-amber-900/60 via-slate-900 to-emerald-900/60 border border-amber-500/40 p-4 rounded-2xl space-y-2">
+              <div class="text-[10px] font-black text-amber-400 uppercase">DKWIN OFFICIAL BANGLADESH</div>
+              <div class="text-base font-black text-white">Win Go, 4x Crash Plane, Thimbles, JILI Slots ও 1xBet ক্রিকেট মাল্টি!</div>
+              <div class="text-xs text-slate-300">মিনিমাম বেট ৳${s.minBet} · মিনিমাম ডিপোজিট ৳${s.minDeposit} · রেফার কমিশন ${s.referralDepositCommissionPercent}%</div>
+            </div>
+
+            <div class="grid grid-cols-4 gap-2 text-center text-xs font-bold">
+              <button onclick="dkAction.openModal('deposit')" class="bg-slate-900 border border-emerald-500/30 p-2.5 rounded-xl text-emerald-400">➕ ডিপোজিট</button>
+              <button onclick="dkAction.openModal('withdraw')" class="bg-slate-900 border border-amber-500/30 p-2.5 rounded-xl text-amber-400">⬆️ উইথড্র</button>
+              <button onclick="dkAction.openModal('chat')" class="bg-slate-900 border border-sky-500/30 p-2.5 rounded-xl text-sky-400">✈️ টেলিগ্রাম</button>
+              <button onclick="dkAction.setTab('admin')" class="bg-slate-900 border border-purple-500/30 p-2.5 rounded-xl text-purple-400">🛡️ এডমিন</button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2.5">
+              <div onclick="dkAction.openGame('wingo')" class="cursor-pointer bg-gradient-to-br from-emerald-700 to-slate-900 p-3.5 rounded-2xl border border-white/15 space-y-2">
+                <div class="flex justify-between"><span class="text-[9px] bg-red-600 px-2 py-0.5 rounded-full font-black">HOT #1</span><span class="text-2xl">🎯</span></div>
+                <div class="font-black text-sm">Win Go কালার লটারী</div>
+                <div class="text-[10px] text-slate-300">30s / 1m / 3m / 5m · Big/Small</div>
+              </div>
+
+              <div onclick="dkAction.openGame('crash', 'aviator')" class="cursor-pointer bg-gradient-to-br from-rose-700 to-slate-900 p-3.5 rounded-2xl border border-white/15 space-y-2">
+                <div class="flex justify-between"><span class="text-[9px] bg-amber-500 text-black px-2 py-0.5 rounded-full font-black">4 CRASH PLANES</span><span class="text-2xl">✈️</span></div>
+                <div class="font-black text-sm">Aviator / JetX / SpaceXY</div>
+                <div class="text-[10px] text-slate-300">৪টি ক্র্যাশ প্লেন গেম · 100x</div>
+              </div>
+
+              <div onclick="dkAction.openGame('thimbles')" class="cursor-pointer bg-gradient-to-br from-amber-700 to-slate-900 p-3.5 rounded-2xl border border-white/15 space-y-2">
+                <div class="flex justify-between"><span class="text-[9px] bg-emerald-600 px-2 py-0.5 rounded-full font-black">THIMBLES</span><span class="text-2xl">🏆</span></div>
+                <div class="font-black text-sm">Thimbles (থাম্বিল গেম)</div>
+                <div class="text-[10px] text-slate-300">৩ কাপের নিচে বল খুঁজুন · 2.88x</div>
+              </div>
+
+              <div onclick="dkAction.openGame('sports')" class="cursor-pointer bg-gradient-to-br from-green-700 to-slate-900 p-3.5 rounded-2xl border border-white/15 space-y-2">
+                <div class="flex justify-between"><span class="text-[9px] bg-amber-500 text-black px-2 py-0.5 rounded-full font-black">1XBET MULTI</span><span class="text-2xl">🏏</span></div>
+                <div class="font-black text-sm">BPL & Cricket মাল্টি বেট</div>
+                <div class="text-[10px] text-slate-300">সিঙ্গেল ও মাল্টি বেট স্লিপ</div>
+              </div>
+
+              <div onclick="dkAction.openGame('slots', 'jili_super_ace')" class="cursor-pointer bg-gradient-to-br from-blue-700 to-slate-900 p-3.5 rounded-2xl border border-white/15 space-y-2">
+                <div class="flex justify-between"><span class="text-[9px] bg-amber-500 text-black px-2 py-0.5 rounded-full font-black">JILI TOP</span><span class="text-2xl">🃏</span></div>
+                <div class="font-black text-sm">JILI Super Ace & Slots</div>
+                <div class="text-[10px] text-slate-300">Super Ace, Golden Empire, Tiger</div>
+              </div>
+
+              <div onclick="dkAction.openGame('slots', 'fortune_tiger')" class="cursor-pointer bg-gradient-to-br from-purple-700 to-slate-900 p-3.5 rounded-2xl border border-white/15 space-y-2">
+                <div class="flex justify-between"><span class="text-[9px] bg-pink-600 px-2 py-0.5 rounded-full font-black">SPRIBE & PG</span><span class="text-2xl">🐯</span></div>
+                <div class="font-black text-sm">Fortune Tiger & Olympus</div>
+                <div class="text-[10px] text-slate-300">2500x জ্যাকপট স্লট</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      root.innerHTML = `
+        <!-- Top Header -->
+        <header class="sticky top-0 z-30 bg-slate-950/95 backdrop-blur border-b border-amber-500/20 px-3 py-2.5 flex items-center justify-between">
+          <div onclick="dkAction.setTab('home')" class="flex items-center gap-2 cursor-pointer">
+            <div class="w-8 h-8 rounded-lg bg-amber-500 text-slate-950 font-black flex items-center justify-center text-sm">DK</div>
+            <div>
+              <div class="font-black text-sm text-amber-400">DKWIN</div>
+              <div class="text-[9px] text-slate-400">OFFICIAL GAMING BD</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            ${user ? `
+              <div onclick="dkAction.setTab('wallet')" class="cursor-pointer bg-slate-900 border border-amber-500/40 px-2.5 py-1 rounded-lg text-xs font-black text-amber-400">৳${user.balance.toFixed(2)}</div>
+              <button onclick="dkAction.openModal('deposit')" class="bg-emerald-500 text-slate-950 px-2.5 py-1 rounded-lg text-xs font-black">+ ডিপোজিট</button>
+              <button onclick="dkAction.logoutUser()" class="bg-slate-800 text-slate-300 px-2 py-1 rounded-lg text-[10px]">লগআউট</button>
+            ` : `
+              <button onclick="dkAction.openModal('auth')" class="bg-amber-500 text-slate-950 px-3 py-1.5 rounded-lg text-xs font-black">লগইন / রেজিস্টার</button>
+            `}
+          </div>
+        </header>
+
+        <!-- Main View -->
+        <main class="flex-1">${mainContent}</main>
+
+        <!-- Bottom Nav -->
+        <nav class="fixed bottom-0 left-0 right-0 z-30 bg-slate-900 border-t border-slate-800 max-w-lg mx-auto grid grid-cols-4 py-2 text-center text-[11px] font-bold">
+          <button onclick="dkAction.setTab('home')" class="${state.activeTab === 'home' ? 'text-amber-400 font-black' : 'text-slate-400'}">🏠 হোম</button>
+          <button onclick="dkAction.setTab('wallet')" class="${state.activeTab === 'wallet' ? 'text-amber-400 font-black' : 'text-slate-400'}">💳 ওয়ালেট</button>
+          <button onclick="dkAction.openModal('chat')" class="text-sky-400">✈️ সাপোর্ট</button>
+          <button onclick="dkAction.setTab('admin')" class="${state.activeTab === 'admin' ? 'text-amber-400 font-black' : 'text-slate-400'}">🛡️ এডমিন</button>
+        </nav>
+
+        <!-- Modals -->
+        ${modalType === "auth" ? `
+          <div class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+            <div class="bg-slate-900 border border-amber-500/40 rounded-3xl p-5 w-full max-w-sm space-y-3">
+              <div class="flex justify-between items-center">
+                <span class="font-black text-amber-400 text-sm">নতুন একাউন্ট (ডিফল্ট ব্যালেন্স ৳0.00) / লগইন</span>
+                <button onclick="dkAction.closeModal()" class="text-slate-400">✕</button>
+              </div>
+              <input id="reg-username" placeholder="ইউজারনেম (নতুন একাউন্টের জন্য)" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs" />
+              <input id="reg-phone" placeholder="মোবাইল নাম্বার (১১ ডিজিট)" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs" />
+              <input id="reg-pass" type="password" placeholder="পাসওয়ার্ড" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs" />
+              <input id="reg-ref" placeholder="রেফার কোড (ঐচ্ছিক)" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-xs" />
+              <button onclick="dkAction.registerUser()" class="w-full py-2.5 rounded-xl bg-amber-500 text-slate-950 font-black text-xs">রেজিস্টার করুন (ব্যালেন্স ৳0.00)</button>
+              <div class="border-t border-slate-800 pt-2 space-y-2">
+                <input id="login-id" placeholder="লগইন: মোবাইল নাম্বার বা ইউজারনেম" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs" />
+                <input id="login-pass" type="password" placeholder="লগইন পাসওয়ার্ড" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs" />
+                <button onclick="dkAction.loginUser()" class="w-full py-2 rounded-xl bg-emerald-500 text-slate-950 font-black text-xs">লগইন করুন</button>
+              </div>
+            </div>
+          </div>
+        ` : ""}
+
+        ${modalType === "deposit" ? `
+          <div class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+            <div class="bg-slate-900 border border-emerald-500/40 rounded-3xl p-5 w-full max-w-sm space-y-3 text-xs">
+              <div class="flex justify-between items-center">
+                <span class="font-black text-emerald-400 text-sm">ওয়ালেট ডিপোজিট (মিনিমাম ৳${s.minDeposit})</span>
+                <button onclick="dkAction.closeModal()" class="text-slate-400">✕</button>
+              </div>
+              <div class="bg-slate-950 p-3 rounded-xl border border-amber-500/30 space-y-1">
+                <div>বিকাশ: <span class="text-amber-400 font-mono font-black">${s.bkashNumber}</span> (${s.bkashRule})</div>
+                <div>নগদ: <span class="text-amber-400 font-mono font-black">${s.nagadNumber}</span> (${s.nagadRule})</div>
+                <div class="text-[10px] text-slate-400 pt-1 whitespace-pre-line">${s.depositRulesText}</div>
+              </div>
+              <select id="dep-method" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white">
+                <option value="bkash">বিকাশ (bKash)</option>
+                <option value="nagad">নগদ (Nagad)</option>
+                <option value="rocket">রকেট (Rocket)</option>
+                <option value="upay">উপায় (Upay)</option>
+              </select>
+              <input id="dep-amount" type="number" value="${s.minDeposit}" min="${s.minDeposit}" placeholder="ডিপোজিট পরিমাণ (৳)" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-amber-400 font-black" />
+              <input id="dep-sender" placeholder="আপনার প্রেরক নাম্বার (১১ ডিজিট)" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5" />
+              <input id="dep-trx" placeholder="ট্রানজেকশন আইডি (TrxID)" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 uppercase font-mono" />
+              <div class="bg-amber-950/40 border border-amber-500/30 p-2.5 rounded-xl text-[11px] text-amber-300">
+                ⏳ ${s.pendingProcessingNotice}
+              </div>
+              <button onclick="dkAction.submitDeposit()" class="w-full py-3 rounded-xl bg-emerald-500 text-slate-950 font-black">ডিপোজিট রিকোয়েস্ট সাবমিট করুন</button>
+            </div>
+          </div>
+        ` : ""}
+
+        ${modalType === "withdraw" ? `
+          <div class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+            <div class="bg-slate-900 border border-amber-500/40 rounded-3xl p-5 w-full max-w-sm space-y-3 text-xs">
+              <div class="flex justify-between items-center">
+                <span class="font-black text-amber-400 text-sm">উইথড্র রিকোয়েস্ট (মিনিমাম ৳${s.minWithdraw})</span>
+                <button onclick="dkAction.closeModal()" class="text-slate-400">✕</button>
+              </div>
+              <select id="wd-method" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white">
+                <option value="bkash">বিকাশ (bKash)</option>
+                <option value="nagad">নগদ (Nagad)</option>
+                <option value="rocket">রকেট (Rocket)</option>
+              </select>
+              <input id="wd-amount" type="number" value="${s.minWithdraw}" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-amber-400 font-black" />
+              <input id="wd-number" placeholder="আপনার পার্সোনাল রিসিভার নাম্বার" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5" />
+              <input id="wd-pass" type="password" placeholder="আপনার লগইন পাসওয়ার্ড" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5" />
+              <div class="bg-amber-950/40 border border-amber-500/30 p-2.5 rounded-xl text-[11px] text-amber-300">
+                ⏳ ${s.pendingProcessingNotice}
+              </div>
+              <button onclick="dkAction.submitWithdraw()" class="w-full py-3 rounded-xl bg-amber-500 text-slate-950 font-black">উইথড্র সাবমিট করুন</button>
+            </div>
+          </div>
+        ` : ""}
+
+        ${modalType === "chat" ? `
+          <div class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+            <div class="bg-slate-900 border border-sky-500/40 rounded-3xl p-5 w-full max-w-sm space-y-3 text-xs">
+              <div class="flex justify-between items-center">
+                <span class="font-black text-sky-400 text-sm">✈️ অফিশিয়াল টেলিগ্রাম ও লাইভ সাপোর্ট</span>
+                <button onclick="dkAction.closeModal()" class="text-slate-400">✕</button>
+              </div>
+              <div class="bg-sky-950/60 border border-sky-500/40 p-3.5 rounded-2xl space-y-2 text-center">
+                <div class="text-slate-300">যেকোনো সাহায্যের জন্য আমাদের টেলিগ্রামে মেসেজ দিন:</div>
+                <div class="text-base font-black text-amber-400 font-mono">${s.telegramSupportUsername}</div>
+                <a href="https://t.me/${s.telegramSupportUsername.replace('@', '')}" target="_blank" class="block w-full py-2.5 rounded-xl bg-sky-500 text-slate-950 font-black">টেলিগ্রামে সরাসরি কথা বলুন →</a>
+              </div>
+            </div>
+          </div>
+        ` : ""}
+
+        ${toastMsg ? `
+          <div class="fixed top-16 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl font-bold text-xs shadow-2xl ${toastMsg.isError ? 'bg-red-900 text-white border border-red-400' : 'bg-emerald-900 text-white border border-emerald-400'}">
+            ${toastMsg.text}
+          </div>
+        ` : ""}
+      `;
+    }
+
+    render();
+  </script>
+</body>
+</html>
